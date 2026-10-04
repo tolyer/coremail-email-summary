@@ -2,6 +2,11 @@
 
 一个用于 Coremail 网页版的邮件反馈追踪 Skill。它会把“我方发出的邮件”和“对方后续回复”配对整理，适合需求澄清、评审请求、范围确认、报价问询和其他需要逐条跟进的场景。
 
+> [!IMPORTANT]
+> 要获得最佳效果，**必须使用 Tabbit Browser，并通过 Tabbit CLI 执行浏览器操作**。本 Skill 的标签页接管、邮件读取、会话遍历和安全校验流程都是围绕这套环境设计的；使用其他浏览器无法保证完整功能和稳定性。
+>
+> [通过我的推广链接使用 Tabbit Browser](https://web.tabbit.ai/activity/invite/F1E33DB4?k=gvACADsb6ta4ADqt2lQmADcQNw)
+
 ## 它能做什么
 
 - 同时检查已发送和收件箱，定位我方发出的邮件及后续回复；
@@ -36,8 +41,8 @@ Skill 默认以读取和整理为主，不会自行删除邮件、清除登录�
 
 ## 前置条件
 
+- **必须安装并运行 Tabbit Browser，同时使用 Tabbit CLI；**
 - 能正常访问并登录目标 Coremail 网页版；
-- 本机运行 Tabbit Browser；
 - Python 3.10 或更高版本；
 - Node.js 为可选依赖，用于检查生成报告中的 JavaScript 语法。
 
