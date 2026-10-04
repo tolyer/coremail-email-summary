@@ -1,0 +1,7 @@
+interface:
+  display_name: "coremail 邮件总结"
+  short_description: "追踪 Coremail 已发送邮件与对方反馈，生成中英文总结报告"
+  default_prompt: "Use $coremail-sent-feedback-tracker to review my sent Coremail messages, match the replies, and produce a bilingual feedback summary."
+
+policy:
+  allow_implicit_invocation: true

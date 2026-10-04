@@ -1,0 +1,98 @@
+{
+  "updated": "2026-10-04",
+  "window": "2026-09-01 ~ 2026-10-04",
+  "window_en": "2026-09-01 ~ 2026-10-04",
+  "scope": {
+    "self_addr": "you@yourcompany.com",
+    "peer_domains": ["customer.com"],
+    "note": "Demo data: only emails sent by myself are counted"
+  },
+  "todos": [
+    { "mail": "M1", "zh": "向对方索要 Sample 文件", "en": "Ask the client for the sample file" }
+  ],
+  "held_todos": [],
+  "memos": {
+    "M1-0000000000": { "s": 1, "n": "demo memo" }
+  },
+  "memos_v": 1,
+  "mails": [
+    {
+      "id": "M1",
+      "sender": "you(你的名字)",
+      "sender_en": "you (Your Name)",
+      "subject": "Clarification Required: Demo Requirements",
+      "subject_en": "Clarification Required: Demo Requirements",
+      "sent": "2026-09-01 首轮 · 09-05 跟进",
+      "sent_en": "1st round 2026-09-01 · follow-up 09-05",
+      "from_addr": "you@yourcompany.com",
+      "note": "09-03 已召开对齐会议，邮件中无纪要",
+      "note_en": "Alignment meeting held on 09-03; no minutes circulated by email",
+      "docs": ["Demo FSD-01-Requirements"],
+      "to": [
+        { "n": "Alice Wong", "n_en": "Alice Wong", "e": "alice@customer.com", "org": "Customer", "name_fallback": "alice" }
+      ],
+      "cc": [
+        { "n": "Bob Lee", "n_en": "Bob Lee", "e": "bob@customer.com", "org": "Customer", "name_fallback": "bob" }
+      ],
+      "items": [
+        {
+          "q": "1. 第一条待确认项（@Alice）<br>请确认是否沿用现有流程",
+          "qe": "1. First item to confirm (@Alice)<br>Please confirm whether to follow the existing flow",
+          "who": "Alice Wong<br>alice@customer.com",
+          "when": "2026-09-03 10:22",
+          "raw": "Confirmed. We will follow the existing flow.",
+          "sum": "已确认，沿用现有流程。",
+          "se": "Confirmed. Follow the existing flow.",
+          "st": "ok"
+        },
+        {
+          "q": "2. 第二条待确认项（@Alice @Bob）",
+          "qe": "2. Second item to confirm (@Alice @Bob)",
+          "who": "Bob Lee<br>bob@customer.com",
+          "when": "2026-09-04 16:40",
+          "raw": "Bob: We need to check with IT first.",
+          "sum": "Bob 表示需先与 IT 确认。",
+          "se": "Bob said he needs to check with IT first.",
+          "st": "part",
+          "cf": { "zh": "Alice 认为可直接沿用，Bob 要求先与 IT 确认，两人答复不一致",
+                  "en": "Alice says it can be reused directly; Bob asks to check with IT first. Inconsistent answers." }
+        },
+        {
+          "q": "3. 第三条待确认项",
+          "qe": "3. Third item to confirm",
+          "who": "—",
+          "when": "—",
+          "raw": "—",
+          "sum": "—",
+          "se": "—",
+          "st": "none"
+        }
+      ]
+    }
+  ],
+  "held": [
+    {
+      "id": "M2",
+      "sender": "客户来件",
+      "sender_en": "Inbound from client",
+      "subject": "Re: Demo (client initiated)",
+      "subject_en": "Re: Demo (client initiated)",
+      "sent": "2026-09-06",
+      "sent_en": "2026-09-06",
+      "from_addr": "alice@customer.com",
+      "to": [], "cc": [],
+      "items": [
+        {
+          "q": "1. 客户发起的议题",
+          "qe": "1. Topic raised by client",
+          "who": "you<br>you@yourcompany.com",
+          "when": "2026-09-07 09:00",
+          "raw": "Our reply goes here.",
+          "sum": "我方已回应。",
+          "se": "We replied.",
+          "st": "ok"
+        }
+      ]
+    }
+  ]
+}

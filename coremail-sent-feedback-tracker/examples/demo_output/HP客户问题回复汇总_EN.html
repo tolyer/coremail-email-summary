@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HP Client Clarification Tracker</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f6f7f9;color:#1f2329;
+  font:14px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+.wrap{max-width:1680px;margin:0 auto;padding:24px 22px 70px}
+h1{font-size:22px;margin:0 0 4px}
+.sub{color:#5c6470;font-size:13px;margin-bottom:14px}
+
+.cards{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.card{background:#fff;border:1px solid #e3e6eb;border-radius:10px;padding:10px 14px;min-width:104px}
+.card .n{font-size:20px;font-weight:600;line-height:1.2}
+.card .l{font-size:12px;color:#5c6470;margin-top:2px}
+.card.ok .n{color:#0f9d58}.card.part .n{color:#b06000}.card.fwd .n{color:#1967d2}.card.none .n{color:#9aa0a6}
+
+.todo{background:#fff8e6;border:1px solid #fce8b2;border-radius:10px;padding:12px 16px 12px 30px;margin-bottom:14px}
+.todo .th{font-weight:600;font-size:13px;margin:0 0 4px -14px;color:#8a5a00}
+.todo .th .tc{color:#c5221f;font-weight:700}
+.todo ol{margin:0;padding-left:16px;max-height:240px;overflow:auto}
+.todo li{font-size:13px;margin:3px 0;line-height:1.5;padding:1px 6px;border-radius:5px;cursor:pointer}
+.todo li:hover{background:#fff1cc}
+.todo li.tnone{color:#9aa0a6;cursor:default;list-style:none;margin-left:-16px}
+.todo li.tnone:hover{background:transparent}
+.todo b{color:#8a5a00}
+
+/* ---------- mail switcher (compact dropdown) ---------- */
+.msel{position:sticky;top:0;z-index:8;background:#f6f7f9;padding:6px 0 8px;
+  border-bottom:2px solid #dfe3ea}
+.msel .row{display:flex;align-items:center;gap:8px}
+.nav{flex:0 0 auto;width:34px;height:34px;border:1px solid #d6dae0;background:#fff;
+  border-radius:8px;cursor:pointer;font-size:16px;line-height:1;color:#3c4043;
+  font-family:inherit;display:flex;align-items:center;justify-content:center;padding:0}
+.nav:hover{border-color:#2f6feb;color:#2f6feb}
+.nav:disabled{opacity:.45;cursor:default;border-color:#e0e4ea;color:#9aa0a6}
+.dd{position:relative;flex:1;min-width:0}
+.ddbtn{width:100%;display:flex;align-items:center;gap:9px;text-align:left;cursor:pointer;
+  border:1px solid #d6dae0;background:#fff;border-radius:8px;padding:7px 12px;
+  font-family:inherit;font-size:13px;color:#1f2329}
+.ddbtn:hover{border-color:#2f6feb}
+.dd.on .ddbtn{border-color:#2f6feb;box-shadow:0 0 0 3px #e8f0fe}
+.ddbtn .bid{flex:0 0 auto;background:#2f6feb;color:#fff;font-size:11.5px;font-weight:700;
+  border-radius:5px;padding:2px 8px}
+.ddbtn .bsm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  font-weight:600}
+.ddbtn .bct{flex:0 0 auto;color:#5c6470;font-size:11.5px;white-space:nowrap}
+.ddbtn .car{flex:0 0 auto;color:#80868b;font-size:10px}
+.ddpanel{display:none;position:absolute;top:calc(100% + 5px);left:0;right:0;z-index:20;
+  background:#fff;border:1px solid #d6dae0;border-radius:10px;overflow:hidden;
+  box-shadow:0 10px 30px rgba(16,24,40,.16)}
+.dd.on .ddpanel{display:block}
+.ddf{padding:8px 10px;border-bottom:1px solid #eceff4;background:#fbfcfe}
+.ddf input{width:100%;box-sizing:border-box;border:1px solid #d6dae0;border-radius:7px;
+  padding:6px 10px;font-size:12.5px;outline:none;font-family:inherit}
+.ddf input:focus{border-color:#2f6feb}
+.ddlist{max-height:min(62vh,560px);overflow:auto}
+.ddo{display:grid;grid-template-columns:38px 1fr;gap:0 9px;padding:9px 12px;
+  cursor:pointer;font-size:12.5px;border-bottom:1px solid #f2f4f7}
+.ddo:last-child{border-bottom:none}
+.ddo:hover{background:#f1f6ff}
+.ddo.on{background:#eef4ff}
+.ddo .oid{grid-column:1;grid-row:1;font-weight:700;color:#2f6feb;font-size:11.5px;
+  line-height:1.55;padding-top:1px}
+.ddo .osb{grid-column:2;grid-row:1;color:#1f2329;line-height:1.55;font-weight:600;
+  word-break:break-word;overflow-wrap:anywhere}
+.ddo.on .osb{font-weight:700}
+.ddo2{grid-column:2;grid-row:2;display:flex;flex-wrap:wrap;gap:3px 16px;margin-top:5px;
+  font-size:11.5px;color:#5c6470}
+.ddo2 .ofr{word-break:break-word;overflow-wrap:anywhere}
+.ddo2 .olb{color:#9aa0a6;margin-right:5px}
+.ddo2 .ost{font-family:ui-monospace,Menlo,Consolas,monospace;color:#9aa0a6}
+.ddo2 .ost b{font-weight:700}
+.ddo2 .ost b.n1{color:#0f9d58}
+.ddo2 .ost b.n2{color:#b06000}
+.ddo2 .ost b.n3{color:#1967d2}
+.ddo2 .ost b.n4{color:#9aa0a6}
+.ddempty{padding:16px;text-align:center;color:#9aa0a6;font-size:12.5px}
+
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:12px 0 13px}
+.chip{border:1px solid #d6dae0;background:#fff;border-radius:16px;padding:5px 12px;font-size:12px;
+  cursor:pointer;color:#3c4043;white-space:nowrap}
+.chip:hover{border-color:#2f6feb;color:#2f6feb}
+.chip.on{background:#2f6feb;border-color:#2f6feb;color:#fff}
+input.search{flex:1;min-width:240px;border:1px solid #d6dae0;border-radius:8px;padding:7px 12px;
+  font-size:13px;outline:none}
+input.search:focus{border-color:#2f6feb}
+
+/* ---------- mail header card ---------- */
+.mailcard{background:#fff;border:1px solid #dfe3ea;border-radius:0 12px 12px 12px;overflow:hidden;
+  box-shadow:0 1px 2px rgba(16,24,40,.04)}
+.mhead{padding:14px 18px 13px;border-bottom:2px solid #e8ecf2;
+  background:linear-gradient(180deg,#ffffff 0%,#fbfcfe 100%)}
+.mh-top{display:flex;gap:12px;align-items:flex-start}
+.mid{flex:0 0 auto;display:inline-block;background:#2f6feb;color:#fff;font-size:12.5px;font-weight:700;
+  border-radius:6px;padding:2px 9px;letter-spacing:.3px;margin-top:2px}
+.mtitle{flex:1;font-size:15.5px;font-weight:700;line-height:1.45;color:#1f2329;word-break:break-word}
+.mstat{flex:0 0 auto;font-size:11.5px;color:#5c6470;text-align:right;line-height:1.9;white-space:nowrap}
+.mstat b{font-weight:700}
+.mstat .n1 b{color:#0f9d58}.mstat .n2 b{color:#b06000}
+.mstat .n3 b{color:#1967d2}.mstat .n4 b{color:#9aa0a6}.mstat .n5 b{color:#c5221f}
+.mmeta{display:grid;grid-template-columns:78px 1fr;gap:5px 12px;margin-top:11px;font-size:12.5px}
+.mmeta .k{color:#80868b;text-align:right;line-height:1.8}
+.mmeta .v{color:#1f2329;line-height:1.8;word-break:break-word;overflow-wrap:anywhere}
+.mmeta .v .who-nm{font-weight:600}
+.mmeta .v .addr{color:#5c6470}
+.mmeta .v .time{font-weight:600;color:#1f2329}
+.prog{background:#eef4ff;border-left:3px solid #4a7fd4;padding:2px 8px;border-radius:3px;color:#2c4a7c;}
+.pp{white-space:nowrap;display:inline-block;margin-right:2px}
+.pp .e{color:#6b7280;font-size:11.5px}
+
+/* ---------- owner cell ---------- */
+.own{display:flex;flex-direction:column;gap:4px}
+.ow{display:block;line-height:1.45}
+.ow .ow-nm{font-weight:600}
+.ow .ow-em{color:#5c6470;font-size:11px;display:block;word-break:break-all;
+  font-family:ui-monospace,Menlo,Consolas,monospace}
+.ow .ow-st{display:inline-block;font-size:10.5px;font-weight:700;border-radius:9px;
+  padding:0 7px;margin-left:4px;white-space:nowrap;vertical-align:1px}
+.ow .ow-st.ok{background:#e6f4ea;color:#0f9d58}
+.ow .ow-st.no{background:#f1f3f4;color:#80868b}
+.ow .ow-st.team{background:#eef2ff;color:#4b5fa8}
+.ow.on{border-left:2px solid #0f9d58;padding-left:7px;margin-left:-9px}
+.ow.ex{border-left:2px dashed #c9ced6;padding-left:7px;margin-left:-9px}
+.ow .ow-lb{font-size:10.5px;color:#80868b;display:block;letter-spacing:.2px}
+.ow.non .ow-lb{color:#9aa0a6}
+td.own-cell{line-height:1.5}
+
+/* ---------- detail table ---------- */
+table{width:100%;table-layout:fixed;border-collapse:separate;border-spacing:0;background:#fff}
+th{background:#f0f2f5;text-align:left;font-size:12px;color:#3c4043;padding:9px 12px;
+  border-bottom:1px solid #e3e6eb;white-space:nowrap}
+td{padding:10px 12px;border-bottom:1px solid #eef0f3;vertical-align:top;font-size:13px;
+  word-break:break-word;overflow-wrap:anywhere}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#f8f9fb}
+td.qcol{line-height:1.55;font-weight:600}
+.qsub{display:block;font-weight:400;color:#5c6470;font-size:12px;margin-top:4px;line-height:1.5}
+.who .nm{font-weight:600}
+.who .em{color:#5c6470;font-size:11px;word-break:break-all;display:block;margin-top:1px}
+.who .dt{color:#80868b;font-size:11px;display:block;margin-top:2px}
+.raw{line-height:1.58;color:#202124}
+.sum{line-height:1.62;color:#202124}
+.badge{display:inline-block;padding:1px 8px;border-radius:10px;font-size:11px;font-weight:600;
+  white-space:nowrap;margin-right:6px}
+.badge.ok{background:#e6f4ea;color:#0f9d58}
+.badge.part{background:#fef7e0;color:#b06000}
+.badge.fwd{background:#e8f0fe;color:#1967d2}
+.badge.none{background:#f1f3f4;color:#80868b}
+code{background:#f1f3f4;padding:1px 5px;border-radius:4px;font-size:12px}
+.warn{color:#b06000}
+.cf{display:inline-block;background:#fce8e6;color:#c5221f;border:1px solid #f5c6c4;border-radius:4px;
+  padding:0 6px;font-size:11px;font-weight:700;margin-right:4px;white-space:nowrap}
+.cfn{color:#c5221f}
+.hint{color:#80868b;font-size:12px;margin:12px 0 0}
+
+/* ---------- manual memo (per summary row) ---------- */
+.memo{margin-top:9px;border-top:1px dashed #e0e3e8;padding-top:7px}
+.memo-hd{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.mchk{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;
+  color:#5c6470;cursor:pointer;user-select:none;white-space:nowrap}
+.mchk input{width:14px;height:14px;cursor:pointer;accent-color:#0f9d58;margin:0}
+.mchk.on{color:#0f9d58}
+.sbdg{display:none;font-size:10.5px;font-weight:700;background:#e6f4ea;color:#0f9d58;
+  border-radius:9px;padding:0 7px}
+.sbdg.on{display:inline-block}
+.memo-pv{flex:1;min-width:60px;font-size:11.5px;color:#9aa0a6;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis}
+.memo-pv.has{color:#5c6470}
+.mtog{border:1px solid #d7dae0;background:#fff;color:#3c4043;font-size:11px;border-radius:6px;
+  padding:2px 9px;cursor:pointer;font-family:inherit;white-space:nowrap}
+.mtog:hover{background:#f1f3f4;border-color:#c9ced6}
+.memo-bd{display:none;margin-top:7px}
+.memo.open .memo-bd{display:block}
+.memo.open .memo-pv{display:none}
+.memo-bd .lb{display:block;font-size:10.5px;font-weight:700;color:#80868b;
+  margin:0 0 3px;letter-spacing:.03em}
+.memo-bd textarea{width:100%;box-sizing:border-box;border:1px solid #d7dae0;border-radius:6px;
+  padding:6px 8px;font-size:12.5px;line-height:1.6;font-family:inherit;color:#1f2329;
+  background:#fcfcfd;resize:vertical;margin:0}
+.memo-bd textarea:focus{outline:none;border-color:#1967d2;background:#fff;box-shadow:0 0 0 2px #e8f0fe}
+tr.solved td{background:#f6fbf7}
+tr.solved td.sum{box-shadow:inset 3px 0 0 #0f9d58}
+.card.sol .n{color:#0f9d58}
+.card.open .n{color:#c5221f}
+.card.memo .n{color:#1967d2}
+
+/* ---------- toolbar + export overlay ---------- */
+.tools{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.btn{border:1px solid #d7dae0;background:#fff;color:#3c4043;font-size:12px;border-radius:7px;
+  padding:5px 12px;cursor:pointer;font-family:inherit}
+.btn:hover{background:#f1f3f4;border-color:#c9ced6}
+.btn.dg{color:#c5221f;border-color:#f5c6c4}
+.btn.dg:hover{background:#fce8e6}
+.mhint{font-size:11.5px;color:#80868b}
+.fst{font-size:11.5px;color:#9aa0a6}
+.fst.on{color:#0f9d58;font-weight:600}
+.saved{font-size:11.5px;color:#0f9d58;font-weight:600;opacity:0;transition:opacity .25s}
+.saved.on{opacity:1}
+.ovl{display:none;position:fixed;inset:0;background:rgba(32,33,36,.45);z-index:99;
+  align-items:center;justify-content:center;padding:20px}
+.ovl.on{display:flex}
+.ovl-box{background:#fff;border-radius:12px;padding:18px 20px;width:min(760px,94vw);
+  box-shadow:0 12px 40px rgba(0,0,0,.25)}
+.ovl-box h3{margin:0 0 10px;font-size:15px;color:#1f2329}
+.ovl-box textarea{width:100%;box-sizing:border-box;height:230px;font-size:11.5px;
+  font-family:ui-monospace,Menlo,Consolas,monospace;border:1px solid #d7dae0;border-radius:8px;
+  padding:10px;resize:vertical;color:#1f2329;background:#fcfcfd}
+.ovl-box .row{display:flex;gap:8px;margin-top:10px;align-items:center;flex-wrap:wrap}
+.o-tip{font-size:11.5px;color:#80868b;margin-top:9px;line-height:1.65}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>HP Client Clarification Tracker</h1>
+  <div class="sub">Tabbed view: pick one of our outgoing emails on top; each tab shows that email's questions and the HLBB client replies</div>
+  <div class="sub">Updated: 2026-10-04 · Window: 2026-09-01 ~ 2026-10-04</div>
+  <div class="cards"><div class="card "><div class="n">1</div><div class="l">Outgoing emails</div></div><div class="card "><div class="n">3</div><div class="l">Question items</div></div><div class="card ok"><div class="n">1</div><div class="l">Confirmed</div></div><div class="card part"><div class="n">1</div><div class="l">Partial</div></div><div class="card fwd"><div class="n">0</div><div class="l">Forwarded</div></div><div class="card none"><div class="n">1</div><div class="l">No reply</div></div><div class="card "><div class="n">2 / 2 people</div><div class="l">Client replies</div></div><div class="card sol"><div class="n" id="nSol">0</div><div class="l">Resolved</div></div><div class="card open"><div class="n" id="nOpen">3</div><div class="l">Unmarked / unresolved</div></div><div class="card memo"><div class="n" id="nMemo">0</div><div class="l">With notes</div></div></div>
+  <div class="todo"><div class="th">Open items<span class="tc" id="todoc"> 3</span></div><ol id="todol"><li onclick="jump(0)"><b>M1</b> · 1. First item to confirm (@Alice)</li><li onclick="jump(0)"><b>M1</b> · 2. Second item to confirm (@Alice @Bob)</li><li onclick="jump(0)"><b>M1</b> · 3. Third item to confirm</li></ol></div>
+  <div id="tb"></div>
+  <div class="bar" id="bar"></div>
+  <div class="bar"><input class="search" id="si" placeholder="Search within this email (question / responder / content)…"><span class="chip" style="cursor:default" id="cnt"></span></div>
+  <div class="bar tools"><button class="btn" type="button" onclick="expJSON()">Export / import notes</button><button class="btn" type="button" onclick="saveToFile()">Save to this file</button><span class="fst" id="fst"></span><span class="mhint">Under each summary you can add a note / mark it resolved / record the final conclusion. Changes are saved in this browser automatically; click Save to this file to write them into this HTML (later changes sync automatically).</span><span class="saved" id="saved"></span></div>
+  <div id="host"></div>
+  <div class="ovl" id="ovl"><div class="ovl-box"><h3>Manual notes (JSON)</h3><textarea id="ovlta" spellcheck="false"></textarea><div class="row"><button class="btn" type="button" onclick="cpJSON()">Copy</button><button class="btn" type="button" onclick="dlJSON()">Download</button><button class="btn" type="button" onclick="impJSON()">Import this JSON</button><button class="btn dg" type="button" onclick="clrAll()">Clear all notes</button><button class="btn" type="button" style="margin-left:auto" onclick="ovl(false)">Close</button><span class="saved" id="saved2"></span></div><div class="o-tip">Notes live in this browser only. If they are lost (browser reset, another PC, regenerated file), paste this JSON back and hit Import. You can also send it to me to bake into the data file.</div></div></div>
+  <p class="hint">Reply content is the client's original English text, shown in full; summary is our interpretation. Hover a tab to see the sender and send time of that email.</p>
+</div>
+<script>
+var MAILS = [{"id": "M1", "subj": "Clarification Required: Demo Requirements", "chip": "Clarification Required: Demo Requi…", "sender": "you (Your Name)", "acct": "you@webank.com", "sent": "1st round 2026-09-01 · follow-up 09-05", "note": "Alignment meeting held on 09-03; no minutes circulated by email", "to": [{"n": "Alice Wong", "e": "alice@customer.com"}], "cc": [{"n": "Bob Lee", "e": "bob@customer.com"}], "items": [{"k": "M1-8607d9835b", "q": "1. First item to confirm (@Alice)<br>Please confirm whether to follow the existing flow", "t": "1. First item to confirm (@Alice)", "own": "<div class=\"own\"><div class=\"ow non\"><span class=\"ow-lb\">owner not specified</span></div><div class=\"ow ex\"><span class=\"ow-lb\">Actual reply</span><span class=\"ow-nm\">Alice Wong</span><span class=\"ow-em\">&lt;alice@customer.com&gt;</span></div></div>", "owText": "owner not specified; Actual reply: Alice Wong <alice@customer.com>", "raw": "Confirmed. We will follow the existing flow.", "se": "Confirmed. Follow the existing flow.", "st": "ok"}, {"k": "M1-7c31c94900", "q": "2. Second item to confirm (@Alice @Bob)", "t": "2. Second item to confirm (@Alice @Bob)", "own": "<div class=\"own\"><div class=\"ow non\"><span class=\"ow-lb\">owner not specified</span></div><div class=\"ow ex\"><span class=\"ow-lb\">Actual reply</span><span class=\"ow-nm\">Bob Lee</span><span class=\"ow-em\">&lt;bob@customer.com&gt;</span></div></div>", "owText": "owner not specified; Actual reply: Bob Lee <bob@customer.com>", "raw": "Bob: We need to check with IT first.", "se": "<span class='cf'>⚠ CONFLICTING VIEWS</span><span class='cfn'>Alice says it can be reused directly; Bob asks to check with IT first. Inconsistent answers.</span><br>Bob said he needs to check with IT first.", "st": "part"}, {"k": "M1-e23eeb3b58", "q": "3. Third item to confirm", "t": "3. Third item to confirm", "own": "<div class=\"own\"><div class=\"ow non\"><span class=\"ow-lb\">owner not specified</span></div></div>", "owText": "owner not specified", "raw": "—", "se": "—", "st": "none"}]}];
+var L = {"lang": "en", "title": "HP Client Clarification Tracker", "sub": "Tabbed view: pick one of our outgoing emails on top; each tab shows that email's questions and the HLBB client replies", "updated": "Updated", "window": "Window", "c_mail": "Outgoing emails", "c_item": "Question items", "c_ok": "Confirmed", "c_part": "Partial", "c_fwd": "Forwarded", "c_none": "No reply", "c_reply": "Client replies", "th1": "Question", "th2": "Owner", "th3": "Reply content (verbatim)", "th4": "Reply summary", "todo": "Open items", "todo_none": "No open items - every row is marked resolved", "search": "Search within this email (question / responder / content)…", "all": "All", "pick_ph": "Filter emails: ID / subject / sender / date…", "prev": "Previous email", "next": "Next email", "dd_empty": "No matching email", "m_from": "From", "m_to": "To", "m_cc": "Cc", "m_sent": "Sent", "m_items": "items", "m_prog": "Progress", "st_leg": "Status ok/part/fwd/none", "sent": "Sent", "items": "items", "hint": "Reply content is the client's original English text, shown in full; summary is our interpretation. Hover a tab to see the sender and send time of that email.", "empty": "No matching rows in this email", "cnt": "items", "ago": "+", "ppl": " more", "ow_na": "owner not specified", "ow_yes": "Replied", "ow_no": "No reply", "ow_act": "Actual reply", "ow_team": "team", "c_sol": "Resolved", "c_open": "Unmarked / unresolved", "c_memo": "With notes", "m_add": "+ Note / conclusion", "m_edit": "Edit note", "m_none": "no note yet", "m_sol": "Mark resolved", "m_solved": "Resolved", "m_note": "Note / final conclusion", "m_note_ph": "e.g. confirmed by phone, client agreed; agreed position: allow manual entry...", "m_chip": "Resolved / noted", "m_chip_open": "Unresolved", "m_open": "Unresolved", "open_tip": "Show only rows in this email that are not marked resolved (count = this email)", "exp_open": "Export / import notes", "exp_ti": "Manual notes (JSON)", "exp_tip": "Notes live in this browser only. If they are lost (browser reset, another PC, regenerated file), paste this JSON back and hit Import. You can also send it to me to bake into the data file.", "exp_cp": "Copy", "exp_dl": "Download", "exp_imp": "Import this JSON", "exp_clr": "Clear all notes", "exp_close": "Close", "m_copied": "Copied", "m_imported": "Imported", "m_clred": "Cleared", "m_bad": "Invalid JSON, import aborted", "m_dlfail": "Download blocked by the browser, please use Copy", "m_file": "Save to this file", "m_file_ok": "Saved into this file", "m_file_no": "Not linked to a file; notes are still kept in this browser", "m_file_bad": "Marker missing in this page; cannot write back. Please regenerate the page.", "m_file_dl": "This browser cannot write files directly; an updated copy was downloaded - replace the original with it", "m_file_on": "Linked to this file - changes auto-saved", "m_file_off": "Not linked to a file (browser storage only)", "memo_hint": "Under each summary you can add a note / mark it resolved / record the final conclusion. Changes are saved in this browser automatically; click Save to this file to write them into this HTML (later changes sync automatically)."};
+var ST = {"ok": "Confirmed", "part": "Partial", "fwd": "Forwarded", "none": "No reply"};
+var cur = 0, fs = 'ALL', q = '';
+
+/* ============ manual memos: note / mark resolved / final conclusion ============ */
+var SKEY = 'hp_memo_v2';
+var BAKED = /*MEMO-S*/{"v": 1, "d": {"M1-0000000000": {"s": 1, "n": "demo memo"}}}/*MEMO-E*/;
+var LS = { v: 0, d: {} }, STORE = {};
+try { var _raw = localStorage.getItem(SKEY); if (_raw) { var _o = JSON.parse(_raw); if (_o && _o.d) LS = _o; } } catch (e) {}
+if ((BAKED.v || 0) > (LS.v || 0)) { LS = { v: BAKED.v, d: BAKED.d || {} }; }
+STORE = LS.d || {};
+/* legacy data: older builds kept the note in n and the conclusion in f; both merged into n now */
+for (var _mk in STORE) { var _mv = STORE[_mk];
+  if (_mv && !_mv.n && _mv.f) _mv.n = _mv.f;
+  if (_mv) delete _mv.f;
+}
+function persist() { try { localStorage.setItem(SKEY, JSON.stringify({ v: LS.v, d: STORE })); } catch (e) {} }
+function mget(k) { return STORE[k] || { s: 0, n: '' }; }
+function mset(k, patch) {
+  var o = STORE[k] || { s: 0, n: '' };
+  for (var p in patch) o[p] = patch[p];
+  if (!o.s && !o.n) { delete STORE[k]; } else { STORE[k] = o; }
+  persist(); flush(k); autoWrite();
+}
+function esct(x) { return (x || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+function pvText(k) { var o = mget(k); return (o.n || '').replace(/\s+/g, ' '); }
+function memoHTML(k) {
+  var o = mget(k), pv = pvText(k), has = !!o.n;
+  return '<div class="memo" data-k="' + k + '">'
+    + '<div class="memo-hd">'
+    + '<label class="mchk' + (o.s ? ' on' : '') + '"><input type="checkbox" class="mck"' + (o.s ? ' checked' : '') + '>' + L.m_sol + '</label>'
+    + '<span class="sbdg' + (o.s ? ' on' : '') + '">' + L.m_solved + '</span>'
+    + '<span class="memo-pv' + (pv ? ' has' : '') + '">' + (pv ? esct(pv) : L.m_none) + '</span>'
+    + '<button type="button" class="mtog">' + (has ? L.m_edit : L.m_add) + '</button>'
+    + '</div>'
+    + '<div class="memo-bd">'
+    + '<span class="lb">' + L.m_note + '</span>'
+    + '<textarea class="mnote" rows="3" spellcheck="false" placeholder="' + L.m_note_ph + '">' + esct(o.n) + '</textarea>'
+    + '</div></div>';
+}
+function counts(m){var c={ok:0,part:0,fwd:0,none:0};m.items.forEach(function(i){c[i.st]++;});return c;}
+function tip(m){
+  return [m.subj, L.m_from+': '+m.sender+' <'+m.acct+'>', L.m_sent+': '+m.sent]
+         .join('&#10;').replace(/"/g,'&quot;');
+}
+var ddOn = false, ddQ = '';
+function ddToggle(ev){
+  if(ev && ev.stopPropagation) ev.stopPropagation();
+  ddOn = !ddOn;
+  document.getElementById('tb').innerHTML = tabs();
+  if(ddOn){ var f = document.getElementById('dfi'); if(f) f.focus(); }
+}
+function ddFilter(v){
+  ddQ = (v || '').toLowerCase();
+  var l = document.getElementById('ddlist');
+  if(l) l.innerHTML = ddList(ddQ);
+}
+function ddList(qq){
+  var out = '', n = 0;
+  MAILS.forEach(function(m, i){
+    if(qq){
+      var b = (m.id + ' ' + m.subj + ' ' + m.sender + ' ' + m.sent).toLowerCase();
+      if(b.indexOf(qq) < 0) return;
+    }
+    n++;
+    var c = counts(m);
+    out += '<div class="ddo' + (i === cur ? ' on' : '') + '" onclick="pick(' + i + ')" title="' + tip(m) + '">'
+      + '<span class="oid">' + m.id + '</span>'
+      + '<span class="osb">' + m.subj + '</span>'
+      + '<span class="ddo2">'
+      + '<span class="ofr"><span class="olb">' + L.m_from + '</span>' + m.sender + ' &lt;' + m.acct + '&gt;</span>'
+      + '<span class="ofr"><span class="olb">' + L.m_sent + '</span>' + m.sent + '</span>'
+      + '<span class="ofr"><span class="olb">' + L.m_items + '</span>' + m.items.length + '</span>'
+      + '<span class="ost">' + L.st_leg + ' <b class="n1">' + c.ok + '</b>/<b class="n2">' + c.part
+      + '</b>/<b class="n3">' + c.fwd + '</b>/<b class="n4">' + c.none + '</b></span>'
+      + '</span>'
+      + '</div>';
+  });
+  return n ? out : '<div class="ddempty">' + L.dd_empty + '</div>';
+}
+function pick(i){ ddOn = false; ddQ = ''; setCur(i); }
+function step(d){
+  var n = cur + d;
+  if(n < 0 || n >= MAILS.length) return;
+  ddOn = false; ddQ = ''; setCur(n);
+}
+function tabs(){
+  var m = MAILS[cur];
+  return '<div class="msel"><div class="row">'
+    + '<button class="nav" type="button" onclick="step(-1)"' + (cur === 0 ? ' disabled' : '')
+    + ' title="' + L.prev + '">&#8249;</button>'
+    + '<div class="dd' + (ddOn ? ' on' : '') + '" id="dd">'
+    + '<button class="ddbtn" type="button" onclick="ddToggle(event)" title="' + tip(m) + '">'
+    + '<span class="bid">' + m.id + '</span>'
+    + '<span class="bsm">' + m.chip + '</span>'
+    + '<span class="bct">' + m.items.length + ' ' + L.m_items + ' · ' + (cur + 1) + ' / ' + MAILS.length + '</span>'
+    + '<span class="car">▼</span>'
+    + '</button>'
+    + '<div class="ddpanel">'
+    + '<div class="ddf"><input id="dfi" spellcheck="false" placeholder="' + L.pick_ph + '"'
+    + ' value="' + ea(ddQ) + '" oninput="ddFilter(this.value)"></div>'
+    + '<div class="ddlist" id="ddlist">' + ddList(ddQ) + '</div>'
+    + '</div></div>'
+    + '<button class="nav" type="button" onclick="step(1)"' + (cur === MAILS.length - 1 ? ' disabled' : '')
+    + ' title="' + L.next + '">&#8250;</button>'
+    + '</div></div>';
+}
+function ea(x){
+  return (x || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+}
+function chips(){
+  var h = '<span class="chip'+(fs==='ALL'?' on':'')+'" onclick="setS(\'ALL\')">'+L.all+'</span>';
+  ['ok','part','fwd','none'].forEach(function(k){
+    h += '<span class="chip'+(fs===k?' on':'')+'" onclick="setS(\''+k+'\')">'+ST[k]+'</span>';
+  });
+  var nk = noteKeys().length, no = mailOpen(MAILS[cur].id);
+  h += '<span class="chip'+(fs==='MEMO'?' on':'')+'" onclick="setS(\'MEMO\')">' + L.m_chip + (nk ? ' ' + nk : '') + '</span>';
+  h += '<span class="chip'+(fs==='OPEN'?' on':'')+'" title="' + L.open_tip + '" onclick="setS(\'OPEN\')">' + L.m_chip_open + (no ? ' ' + no : '') + '</span>';
+  return h;
+}
+function setCur(i){ cur=i; fs='ALL'; q=''; var e=document.getElementById('si'); if(e)e.value=''; render(); }
+function setS(v){ fs=v; ddOn=false; render(); }
+function pp(list){
+  return list.map(function(x){
+    var nm = x.n ? '<span class="who-nm">'+x.n+'</span> ' : '';
+    return '<span class="pp">'+nm+'<span class="e">&lt;'+x.e+'&gt;</span></span>';
+  }).join(' · ');
+}
+function head(m, vis){
+  var c = counts(m);
+  return '<div class="mhead">'
+    + '<div class="mh-top"><span class="mid">'+m.id+'</span>'
+    + '<div class="mtitle">'+m.subj+'</div>'
+    + '<div class="mstat"><div>'+vis.length+' / '+m.items.length+' '+L.cnt+'</div>'
+    + '<div><span class="n1">'+ST.ok+' <b>'+c.ok+'</b></span> · <span class="n2">'+ST.part+' <b>'+c.part+'</b></span>'
+    + ' · <span class="n3">'+ST.fwd+' <b>'+c.fwd+'</b></span> · <span class="n4">'+ST.none+' <b>'+c.none+'</b></span></div>'
+    + '<div><span class="n5">'+L.m_open+' <b id="mopen">'+mailOpen(m.id)+'</b></span></div></div></div>'
+    + '<div class="mmeta">'
+    + '<div class="k">'+L.m_from+'</div><div class="v"><span class="who-nm">'+m.sender+'</span> <span class="addr">&lt;'+m.acct+'&gt;</span></div>'
+    + '<div class="k">'+L.m_to+'</div><div class="v">'+pp(m.to)+'</div>'
+    + '<div class="k">'+L.m_cc+'</div><div class="v">'+pp(m.cc)+'</div>'
+    + '<div class="k">'+L.m_sent+'</div><div class="v"><span class="time">'+m.sent+'</span></div>'
+    + (m.note ? '<div class="k">'+L.m_prog+'</div><div class="v"><span class="prog">'+m.note+'</span></div>' : '')
+    + '</div></div>';
+}
+function rows(vis){
+  return vis.map(function(it){
+    var sl = mget(it.k).s ? ' class="solved"' : '';
+    return '<tr'+sl+'><td class="qcol">'+it.q+'</td><td class="own-cell">'+it.own+'</td>'
+      + '<td><div class="raw">'+it.raw+'</div></td>'
+      + '<td class="sum"><span class="badge '+it.st+'">'+ST[it.st]+'</span>'+it.se+memoHTML(it.k)+'</td></tr>';
+  }).join('');
+}
+function render(){
+  var m = MAILS[cur];
+  var vis = m.items.filter(function(it){
+    var o = STORE[it.k];
+    if(fs==='MEMO'){ if(!o || !(o.s || o.n)) return false; }
+    else if(fs==='OPEN'){ if(o && o.s) return false; }
+    else if(fs!=='ALL' && fs!==it.st) return false;
+    if(q){
+      var b=(it.q+' '+it.owText+' '+it.raw+' '+it.se+' '+(o?o.n:'')).toLowerCase();
+      if(b.indexOf(q)<0) return false;
+    }
+    return true;
+  });
+  document.getElementById('tb').innerHTML = tabs();
+  document.getElementById('host').innerHTML = vis.length
+    ? '<div class="mailcard">'+head(m,vis)+'<table><colgroup><col style="width:20%"><col style="width:200px"><col style="width:26%"><col></colgroup><thead><tr><th>Question</th><th>Owner</th><th>Reply content (verbatim)</th><th>Reply summary</th></tr></thead><tbody>'+rows(vis)+'</tbody></table></div>'
+    : '<div class="mailcard"><div style="text-align:center;color:#9aa0a6;padding:44px">'+L.empty+'</div></div>';
+  document.getElementById('bar').innerHTML = chips();
+  document.getElementById('cnt').textContent = vis.length+' / '+m.items.length+' '+L.cnt;
+  updStats();
+}
+function noteKeys(){ return Object.keys(STORE).filter(function(k){ var o=STORE[k]; return o && (o.s || o.n); }); }
+/* counters only look at the rows actually listed in this build */
+function allItems(){ var n=0; for(var i=0;i<MAILS.length;i++) n += MAILS[i].items.length; return n; }
+function solCount(){
+  var n = 0;
+  for(var i=0;i<MAILS.length;i++){ var its = MAILS[i].items;
+    for(var j=0;j<its.length;j++){ var o = STORE[its[j].k]; if(o && o.s) n++; } }
+  return n;
+}
+function openCount(){ return Math.max(0, allItems() - solCount()); }
+function mailOpen(mid){
+  var n = 0;
+  for(var i=0;i<MAILS.length;i++){ var m = MAILS[i]; if(m.id !== mid) continue;
+    for(var j=0;j<m.items.length;j++){ var o = STORE[m.items[j].k]; if(!o || !o.s) n++; } }
+  return n;
+}
+function updStats(){
+  var ks = noteKeys();
+  var a=document.getElementById('nSol'), b=document.getElementById('nMemo'), c=document.getElementById('nOpen');
+  if(a) a.textContent = solCount();
+  if(b) b.textContent = ks.length;
+  if(c) c.textContent = openCount();
+  var mo = document.getElementById('mopen');
+  if(mo && MAILS[cur]) mo.textContent = mailOpen(MAILS[cur].id);
+  var bar=document.getElementById('bar'); if(bar) bar.innerHTML = chips();
+  updTodo();
+}
+/* Open items: live list of the rows not yet marked resolved (same set as the KPI card) */
+function updTodo(){
+  var ol = document.getElementById('todol'); if(!ol) return;
+  var c = document.getElementById('todoc'), out = [];
+  for(var i=0;i<MAILS.length;i++){
+    for(var j=0;j<MAILS[i].items.length;j++){
+      var it = MAILS[i].items[j], o = STORE[it.k];
+      if(o && o.s) continue;
+      out.push('<li onclick="jump(' + i + ')"><b>' + MAILS[i].id + '</b> · ' + esct(it.t) + '</li>');
+    }
+  }
+  if(c) c.textContent = out.length ? ' ' + out.length : '';
+  ol.innerHTML = out.length ? out.join('') : '<li class="tnone">' + L.todo_none + '</li>';
+}
+function jump(i){
+  setCur(i);
+  var h = document.getElementById('host');
+  if(h && h.scrollIntoView){ try { h.scrollIntoView({ block: 'start' }); } catch(e) {} }
+}
+function flush(k){
+  var box = document.querySelector('.memo[data-k="' + k + '"]');
+  if(box){
+    var o = mget(k), has = !!o.n, pv = pvText(k);
+    var tr = box.closest('tr'); if(tr) tr.classList.toggle('solved', !!o.s);
+    var ck = box.querySelector('.mchk'); if(ck) ck.classList.toggle('on', !!o.s);
+    var bg = box.querySelector('.sbdg'); if(bg) bg.classList.toggle('on', !!o.s);
+    var p  = box.querySelector('.memo-pv');
+    if(p){ p.textContent = pv || L.m_none; p.classList.toggle('has', !!pv); }
+    var tg = box.querySelector('.mtog'); if(tg) tg.textContent = has ? L.m_edit : L.m_add;
+  }
+  updStats();
+}
+var _tt;
+function toast(m){
+  [document.getElementById('saved'), document.getElementById('saved2')].forEach(function(e){
+    if(!e) return; e.textContent = m; e.classList.add('on');
+  });
+  clearTimeout(_tt);
+  _tt = setTimeout(function(){
+    [document.getElementById('saved'), document.getElementById('saved2')].forEach(function(e){
+      if(e) e.classList.remove('on');
+    });
+  }, 2000);
+}
+function ovl(open){ var e=document.getElementById('ovl'); if(e) e.classList.toggle('on', !!open); }
+function expJSON(){
+  var ta = document.getElementById('ovlta');
+  if(ta) ta.value = JSON.stringify({ v: LS.v, d: STORE }, null, 1);
+  ovl(true);
+}
+function dlJSON(){
+  var ta = document.getElementById('ovlta'); if(!ta) return;
+  try{
+    var b = new Blob([ta.value], { type: 'application/json' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(b); a.download = 'HP_memos_v' + LS.v + '.json';
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+  }catch(e){ alert(L.m_dlfail); }
+}
+function cpJSON(){
+  var ta = document.getElementById('ovlta'); if(!ta) return;
+  ta.focus(); ta.select();
+  try{ ta.setSelectionRange(0, 999999); document.execCommand('copy'); }catch(e){}
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(ta.value).then(function(){ toast(L.m_copied); }, function(){ toast(L.m_copied); });
+  } else { toast(L.m_copied); }
+}
+function impJSON(){
+  var ta = document.getElementById('ovlta'); if(!ta) return;
+  var o = null;
+  try{ o = JSON.parse(ta.value); }catch(e){ alert(L.m_bad); return; }
+  var d = (o && o.d) ? o.d : o;
+  if(!d || typeof d !== 'object'){ alert(L.m_bad); return; }
+  for(var k in d){ if(d[k]) STORE[k] = d[k]; }
+  if(o && typeof o.v === 'number' && o.v > LS.v) LS.v = o.v;
+  persist(); ovl(false); render(); toast(L.m_imported);
+}
+function clrAll(){
+  if(!confirm(L.exp_clr + ' ?')) return;
+  STORE = {}; LS = { v: LS.v + 1, d: STORE }; persist(); render(); toast(L.m_clred);
+}
+/* ---------- write the marks back into this HTML file ---------- */
+var FSA = null, _wt = null;
+var MA = '/*M' + 'EMO-S*/', MB = '/*M' + 'EMO-E*/';
+function fsName(){
+  var p = (location.pathname || '').split('/').pop() || '';
+  try { p = decodeURIComponent(p); } catch(e) {}
+  return p || 'HP_clarification.html';
+}
+function bakeHTML(){
+  var U = String.fromCharCode(92) + 'u003c';
+  var j = JSON.stringify({ v: LS.v, d: STORE }).split('<').join(U);
+  var s = '<!DOCTYPE html>' + String.fromCharCode(10) + document.documentElement.outerHTML;
+  var a = s.indexOf(MA), b = s.indexOf(MB);
+  if(a < 0 || b < 0 || b < a) return null;
+  return s.slice(0, a + MA.length) + j + s.slice(b);
+}
+function writeBack(){
+  LS.v = (LS.v || 0) + 1;
+  persist();
+  var t = bakeHTML();
+  if(t === null) return Promise.reject(new Error('no-marker'));
+  return FSA.createWritable().then(function(w){
+    return w.write(t).then(function(){ return w.close(); });
+  });
+}
+function markFst(){
+  var e = document.getElementById('fst'); if(!e) return;
+  e.textContent = FSA ? L.m_file_on : L.m_file_off;
+  if(FSA){ e.classList.add('on'); } else { e.classList.remove('on'); }
+}
+function autoWrite(){
+  if(!FSA) return;
+  clearTimeout(_wt);
+  _wt = setTimeout(function(){
+    writeBack().then(function(){ toast(L.m_file_ok); }, function(){});
+  }, 2000);
+}
+function dlHTML(){
+  var t = bakeHTML();
+  if(t === null){ alert(L.m_file_bad); return; }
+  try{
+    var b = new Blob([t], { type: 'text/html;charset=utf-8' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(b); a.download = fsName();
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+    toast(L.m_file_dl);
+  }catch(e){ toast(L.m_file_no); }
+}
+function saveToFile(){
+  if(!window.showSaveFilePicker){ dlHTML(); return; }
+  if(FSA){
+    writeBack().then(function(){ toast(L.m_file_ok); },
+                     function(){ FSA = null; markFst(); dlHTML(); });
+    return;
+  }
+  window.showSaveFilePicker({
+    suggestedName: fsName(),
+    types: [{ description: 'HTML', accept: { 'text/html': ['.html', '.htm'] } }]
+  }).then(function(h){ FSA = h; return writeBack(); })
+    .then(function(){ markFst(); toast(L.m_file_ok); })
+    .catch(function(e){
+      if(e && e.name === 'AbortError') return;
+      FSA = null; markFst();
+      if(e && String(e.message || '').indexOf('no-marker') >= 0){ alert(L.m_file_bad); return; }
+      dlHTML();
+    });
+}
+window.addEventListener('beforeunload', function(){ try{ persist(); }catch(e){} });
+document.addEventListener('input', function(e){
+  var el = e.target; if(!el) return;
+  if(el.id === 'si'){ q = el.value.toLowerCase().trim(); ddOn = false; render(); return; }
+  if(!el.classList) return;
+  var box = el.closest ? el.closest('.memo') : null;
+  if(!box) return;
+  var k = box.getAttribute('data-k');
+  if(el.classList.contains('mnote')) mset(k, { n: el.value });
+});
+document.addEventListener('change', function(e){
+  var el = e.target;
+  if(el && el.classList && el.classList.contains('mck')){
+    var box = el.closest('.memo');
+    if(box) mset(box.getAttribute('data-k'), { s: el.checked ? 1 : 0 });
+  }
+});
+document.addEventListener('click', function(e){
+  var el = e.target;
+  if(ddOn && !(el && el.closest && el.closest('.dd'))){
+    ddOn = false;
+    var tb = document.getElementById('tb'); if(tb) tb.innerHTML = tabs();
+  }
+  if(el && el.classList && el.classList.contains('mtog')){
+    var box = el.closest('.memo');
+    if(box){
+      box.classList.toggle('open');
+      if(box.classList.contains('open')){ var t2 = box.querySelector('.mnote'); if(t2) t2.focus(); }
+    }
+  } else if(el && el.id === 'ovl'){ ovl(false); }
+});
+document.addEventListener('keydown', function(e){
+  if(e.key !== 'Escape') return;
+  ovl(false);
+  if(ddOn){
+    ddOn = false;
+    var tb = document.getElementById('tb'); if(tb) tb.innerHTML = tabs();
+  }
+});
+render();
+markFst();
+</script>
+</body>
+</html>

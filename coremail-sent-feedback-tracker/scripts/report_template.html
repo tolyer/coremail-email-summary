@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>__TITLE__</title>
+<style>
+  :root{
+    --bg:#f7f8fa; --card:#ffffff; --ink:#1f2328; --ink2:#57606a; --line:#d8dee4;
+    --ok:#1a7f37; --okbg:#e8f5ec; --part:#9a6700; --partbg:#fff8e5;
+    --fwd:#0969da; --fwdbg:#e7f0fd; --none:#6e7781; --nonebg:#f0f2f4;
+    --accent:#8250df;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Helvetica,Arial,sans-serif;
+    font-size:16px;line-height:1.7;}
+  .wrap{max-width:1500px;margin:0 auto;padding:32px 24px 64px;}
+  h1{font-size:30px;margin:0 0 6px;letter-spacing:-.4px}
+  .meta{color:var(--ink2);font-size:15px;margin-bottom:22px}
+  .meta b{color:var(--ink)}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin:0 0 26px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+  .card .n{font-size:30px;font-weight:700;line-height:1.1}
+  .card .l{color:var(--ink2);font-size:14px;margin-top:4px}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-bottom:22px}
+  .panel h2{font-size:18px;margin:0 0 10px}
+  .src{font-size:15px;border-left:4px solid var(--accent);padding:8px 0 8px 14px;margin-bottom:12px}
+  .src .s{font-weight:600}
+  .src .d{color:var(--ink2);font-size:14px}
+  .bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:16px}
+  .chip{border:1px solid var(--line);background:#fff;color:var(--ink2);border-radius:999px;
+    padding:7px 15px;font-size:14px;cursor:pointer;user-select:none}
+  .chip:hover{border-color:var(--accent);color:var(--accent)}
+  .chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+  .tag{display:inline-block;border-radius:6px;padding:2px 9px;font-size:13px;font-weight:600;white-space:nowrap}
+  .t-ok{background:var(--okbg);color:var(--ok)}
+  .t-part{background:var(--partbg);color:var(--part)}
+  .t-fwd{background:var(--fwdbg);color:var(--fwd)}
+  .t-none{background:var(--nonebg);color:var(--none)}
+  table{width:100%;border-collapse:separate;border-spacing:0;background:var(--card);
+    border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  th{background:#eef1f4;text-align:left;font-size:15px;font-weight:700;padding:13px 14px;
+    border-bottom:2px solid var(--line);vertical-align:top;position:sticky;top:0;z-index:2}
+  td{padding:14px;border-bottom:1px solid var(--line);vertical-align:top;font-size:15px}
+  tbody tr:hover{background:#f2f6fc}
+  tbody tr:last-child td{border-bottom:none}
+  .quote{font-size:14px;color:var(--ink);background:#fafbfc;border:1px solid var(--line);
+    border-radius:8px;padding:9px 11px;font-style:italic}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;color:var(--fwd);word-break:break-all}
+  .sub{display:block;color:var(--ink2);font-size:13.5px;font-weight:400;margin-top:5px}
+  code{background:#f0f2f4;border-radius:5px;padding:1px 6px;font-size:13.5px}
+  .empty td{text-align:center;color:var(--ink2);padding:28px}
+  .foot{color:var(--ink2);font-size:13.5px;margin-top:18px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>__TITLE__</h1>
+  <div class="meta">__META__</div>
+
+  __CARDS__
+
+  __SOURCES__
+
+  <div class="bar" id="bar"></div>
+  <table>
+    <thead><tr id="thr"></tr></thead>
+    <tbody id="tb"></tbody>
+  </table>
+  <div class="foot" id="foot"></div>
+</div>
+
+<script>
+var HEADS = __HEADS__;
+var ROWS  = __ROWS__;
+var FILTER_KEY = __FILTER_KEY__;
+var TAGS = {'已确认':'t-ok','已定稿':'t-ok','已完成':'t-ok','部分回复':'t-part',
+            '待确认':'t-part','转交他人':'t-fwd','未回复':'t-none','需跟进':'t-part'};
+
+var thr = document.getElementById('thr');
+HEADS.forEach(function(h){ var e=document.createElement('th'); e.textContent=h; thr.appendChild(e); });
+
+function cell(v){
+  if (v === null || v === undefined) return '';
+  var s = String(v);
+  if (TAGS[s]) return '<span class="tag ' + TAGS[s] + '">' + s + '</span>';
+  return s; // 允许数据里带有限的 HTML（<b> / <br> / <span class="tag ...">）
+}
+
+function render(list){
+  var tb = document.getElementById('tb');
+  tb.innerHTML = '';
+  if (!list.length){
+    tb.innerHTML = '<tr class="empty"><td colspan="' + HEADS.length + '">没有匹配的记录</td></tr>';
+  }
+  list.forEach(function(r){
+    var tr = document.createElement('tr');
+    HEADS.forEach(function(h){
+      var td = document.createElement('td');
+      td.innerHTML = cell(r[h]);
+      tr.appendChild(td);
+    });
+    tb.appendChild(tr);
+  });
+  document.getElementById('foot').textContent = '共 ' + list.length + ' 条记录';
+}
+
+var bar = document.getElementById('bar');
+if (FILTER_KEY){
+  var seen = [];
+  ROWS.forEach(function(r){ var v = r[FILTER_KEY]; if (v && seen.indexOf(v) < 0) seen.push(v); });
+  var mk = function(label, val){
+    var c = document.createElement('span');
+    c.className = 'chip'; c.textContent = label;
+    c.onclick = function(){
+      Array.prototype.forEach.call(bar.children, function(x){ x.className = 'chip'; });
+      c.className = 'chip on';
+      render(val === null ? ROWS : ROWS.filter(function(r){ return r[FILTER_KEY] === val; }));
+    };
+    bar.appendChild(c);
+  };
+  mk('全部 (' + ROWS.length + ')', null);
+  seen.forEach(function(v){ mk(v + ' (' + ROWS.filter(function(r){return r[FILTER_KEY]===v;}).length + ')', v); });
+  bar.children[0].className = 'chip on';
+}
+render(ROWS);
+</script>
+</body>
+</html>
