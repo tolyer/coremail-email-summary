@@ -11,7 +11,7 @@
 
 下图为脱敏后的英文版反馈汇总页面。它展示了邮件切换、状态筛选、问题搜索、收发件人信息、负责人回复状态、原文与总结对照，以及“已解决 / 备忘结论”等功能。
 
-![coremail 邮件总结脱敏示意图](assets/coremail-email-summary-preview.png)
+![coremail 邮件总结脱敏示意图](assets/coremail-email-summary-n-preview.png)
 
 ## 它能做什么
 
